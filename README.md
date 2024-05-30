@@ -2,9 +2,9 @@
 
 A minimalistic, zero dependency 3d engine for simple voxel visualizations based on WebGL.
 
-![Sample Image](https://oyo.github.io/voxmi/sample.png)
-
 [Sample Application](https://oyo.github.io/voxmi/)
+
+![Sample Image](https://oyo.github.io/voxmi/sample.png)
 
 ## Usage (Typescript, vite and yarn)
 
@@ -32,4 +32,4 @@ and change `index.html` to this:
 + <body style="margin: 0; overflow: hidden;">
 ```
 
-You should see the content similar to the sample application above
+You should see the content similar to the sample application above.

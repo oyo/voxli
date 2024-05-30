@@ -42,7 +42,8 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.npmjs.org
+          cache: yarn
 
       - name: Get npm version
         id: npm-tag
@@ -79,10 +80,11 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Configure npm  
-        run: npm ci
+#      - name: Publish Shared Components to npm
+#        run: npm publish --provenance --access public
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish Shared Components to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: simenandre/publish-with-yarn@v1
+        with:
+          npm-auth-token: ${{ secrets.NPM_PUBLISH }}
