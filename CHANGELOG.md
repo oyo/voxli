@@ -1,9 +1,12 @@
 # Changelog
 
+## 0.0.3
+
+- enhance: improved README
+
 ## 0.0.2
 
-Bugfix
-- Fix automatic npm publish
+- fix: automated npm publish
 
 ## 0.0.1
 
