@@ -25,7 +25,7 @@ change `index.html` to remove any margins from the body:
 
 Then go and overwrite `src/main.ts` with this:
 
-    import { SceneViewer, Scene, Simple3D, UserInput } from './main'
+    import { SceneViewer, Scene, Simple3D, UserInput } from 'voxmi'
 
     const dataModel = {
       getData: () => [
@@ -65,7 +65,7 @@ Now take this more sophisticated example:
       SceneViewer,
       Simple3D,
       UserInput,
-    } from './main'
+    } from 'voxmi'
 
     new SceneViewer(
       new AnimatedScene(new SampledInterpolator(60, 3, 1)).start(300),

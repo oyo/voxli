@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5
+
+- fix: example import README
+
 ## 0.0.4, 0.0.3
 
 - enhance: improved README
