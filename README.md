@@ -26,7 +26,7 @@ change `index.html` to remove any margins from the body:
 Then go and overwrite `src/main.ts` with this:
 
     import { SceneViewer, Scene, Simple3D, UserInput } from './main'
-    
+
     const dataModel = {
       getData: () => [
         [
@@ -46,7 +46,7 @@ Then go and overwrite `src/main.ts` with this:
         ],
       ],
     }
-    
+
     new SceneViewer(
       new Scene(dataModel),
       new Simple3D().setPos({ x: 0, y: 0, z: -15 }).setCamFov(40),
@@ -59,12 +59,19 @@ You should see a 3D rendering of your 3 x 3 x 3 data matrix.
 
 Now take this more sophisticated example:
 
-    import { AnimatedScene,SampledInterpolator, SceneViewer, Simple3D, UserInput } from 'voxmi'
+    import {
+      AnimatedScene,
+      SampledInterpolator,
+      SceneViewer,
+      Simple3D,
+      UserInput,
+    } from './main'
 
     new SceneViewer(
-      new AnimatedScene(new SampledInterpolator(60, 3, 1)),
+      new AnimatedScene(new SampledInterpolator(60, 3, 1)).start(300),
       new Simple3D().setPos({ x: 0, y: 0, z: -140 }).setCamFov(40),
       new UserInput().setMove({ u: 10, v: 5, w: -2 })
     )
 
-You should see the content similar to the sample application above.
+You should see surface generated with cubic interpolation
+similar to the sample application above.

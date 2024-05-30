@@ -1,27 +1,13 @@
-import { SceneViewer, Scene, Simple3D, UserInput } from './main'
-
-const dataModel = {
-  getData: () => [
-    [
-      [1, 1, 1],
-      [1, 0, 0],
-      [1, 0, 0],
-    ],
-    [
-      [0, 0, 1],
-      [0, 0, 1],
-      [1, 1, 1],
-    ],
-    [
-      [1, 1, 1],
-      [1, 0, 0],
-      [1, 0, 1],
-    ],
-  ],
-}
+import {
+  AnimatedScene,
+  SampledInterpolator,
+  SceneViewer,
+  Simple3D,
+  UserInput,
+} from './main'
 
 new SceneViewer(
-  new Scene(dataModel),
-  new Simple3D().setPos({ x: 0, y: 0, z: -15 }).setCamFov(40),
-  new UserInput().setMove({ u: -45, v: -8, w: -2 })
+  new AnimatedScene(new SampledInterpolator(60, 3, 1)).start(300),
+  new Simple3D().setPos({ x: 0, y: 0, z: -140 }).setCamFov(40),
+  new UserInput().setMove({ u: 10, v: 5, w: -2 })
 )
