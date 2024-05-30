@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.2
+
+Bugfix
+- Fix automatic npm publish
+
 ## 0.0.1
 
 Features

@@ -25,4 +25,11 @@ Now go and overwrite `src/main.ts` with this:
       new UserInput().setMove({ u: 10, v: 5, w: -2 })
     )
 
+and change `index.html` to this:
+
+```diff
+- <body>
++ <body style="margin: 0; overflow: hidden;">
+```
+
 You should see the content similar to the sample application above
