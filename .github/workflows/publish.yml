@@ -51,8 +51,8 @@ jobs:
 
       - name: Check if tag and npm version match
         if: ${{ github.ref_name != steps.npm-tag.outputs.current-version }}
-        run: echo "version not matching" && exit 1 
-  
+        run: echo "version not matching" && exit 1
+
       - name: Versions match
         if: ${{ github.ref_name == steps.npm-tag.outputs.current-version }}
         run: echo "tag and npm version match"

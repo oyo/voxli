@@ -3,11 +3,12 @@ import type { Color, Vector2, Vector3 } from './Types'
 
 export class Simple3D {
   parent: HTMLElement
-  cam = { fov: 40 }
-  pos: Vector3 = { x: 0, y: 0, z: -20 }
+  cam = { fov: 60 }
+  pos: Vector3 = { x: 0, y: 0, z: 0 }
   rot: Vector2 = { x: 0, y: 0 }
   col: Color = { r: 0.7, g: 0.9, b: 1, a: 1 } //{ r: 0.059, g: 0.059, b: 0.137, a: 1 }//{ r: 0, g: 0.1, b: 0.25, a: 1 } // { r: 0.9, g: 0.95, b: 1, a: 1 }
   rMatrix = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+  pMatrix = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -1, 0, 0, 0, 1])
   mode = true
   uniRM: WebGLUniformLocation | null = null
   canvas: HTMLCanvasElement
@@ -16,13 +17,13 @@ export class Simple3D {
   vertexPositionAttribute: number = 0
   vertexColorAttribute: number = 0
   scene: Model | null = null
-  pMatrix: Float32Array = new Float32Array()
   resizeTimer: NodeJS.Timeout | null = null
   numItems: number = 0
 
   constructor(parent: HTMLElement) {
     this.parent = parent
     this.canvas = document.createElement('canvas')
+    this.parent.appendChild(this.canvas)
     try {
       this.gl = this.canvas.getContext('webgl') ?? new WebGLRenderingContext()
     } catch (e) {
@@ -30,14 +31,12 @@ export class Simple3D {
       this.gl = new WebGLRenderingContext()
       return
     }
-    this.gl.clearColor(this.col.r, this.col.g, this.col.b, this.col.a ?? 0)
+    this.gl.clearColor(this.col.r, this.col.g, this.col.b, this.col.a ?? 1)
     this.gl.clearDepth(1)
     this.gl.enable(this.gl.DEPTH_TEST)
     this.gl.enable(this.gl.CULL_FACE)
     this.gl.depthFunc(this.gl.LEQUAL)
-    this.parent.appendChild(this.canvas)
     this.initShaders()
-    this.parent.addEventListener('resize', this.requestResize.bind(this))
     window.addEventListener('resize', this.requestResize.bind(this))
     requestAnimationFrame(this.render.bind(this))
   }
@@ -88,24 +87,11 @@ void main(void) {
   perspective(fov: number, aspect: number, near: number, far: number) {
     const f = 1.0 / Math.tan((fov * Math.PI) / 360)
     const ri = 1 / (near - far)
-    return [
-      f / aspect,
-      0,
-      0,
-      0,
-      0,
-      f,
-      0,
-      0,
-      0,
-      0,
-      (near + far) * ri,
-      -1,
-      0,
-      0,
-      near * far * ri * 2,
-      0,
-    ]
+    const p = this.pMatrix
+    p[0] = f / aspect
+    p[5] = f
+    p[10] = (near + far) * ri
+    p[14] = near * far * ri * 2
   }
 
   render() {
@@ -138,27 +124,25 @@ void main(void) {
 
   requestResize() {
     if (this.resizeTimer) clearTimeout(this.resizeTimer)
-    this.resizeTimer = setTimeout(this.resize.bind(this), 30)
+    this.resizeTimer = setTimeout(this.resize.bind(this), 10)
   }
 
   resize() {
     this.canvas.width = this.parent.clientWidth
     this.canvas.height = this.parent.clientHeight
-    this.pMatrix = new Float32Array(
-      this.perspective(
-        this.cam.fov,
-        this.canvas.width / this.canvas.height,
-        0.5,
-        1000
-      )
+    this.perspective(
+      this.cam.fov,
+      this.canvas.width / this.canvas.height,
+      -0.4,
+      1000
     )
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
-    if (this.shader)
-      this.gl.uniformMatrix4fv(
-        this.gl.getUniformLocation(this.shader, 'uPMatrix'),
-        false,
-        this.pMatrix
-      )
+    if (!this.shader) return
+    this.gl.uniformMatrix4fv(
+      this.gl.getUniformLocation(this.shader, 'uPMatrix'),
+      false,
+      this.pMatrix
+    )
   }
 
   setScene(scene: Model) {
