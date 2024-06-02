@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.6
+
+- fix: constant frame rate
+- renamed some files
+
 ## 0.0.5
 
 - fix: example import README

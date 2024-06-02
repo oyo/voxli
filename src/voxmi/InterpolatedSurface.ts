@@ -1,10 +1,11 @@
-import { CubicInterpolator } from './CubicInterpolator'
+import { getTricubic } from './Interpolator'
 import { DataModel } from './Types'
 
-export class SampledInterpolator implements DataModel {
+export class InterpolatedSurface implements DataModel {
   data: number[][][]
-  filter: boolean[][][] = []
+  filter: number[][][] = []
   thres: number
+  tolerance: number = 0.0003
   cubes: number = 0
 
   static createRandom(dim: number) {
@@ -14,7 +15,7 @@ export class SampledInterpolator implements DataModel {
       if (Math.random() > 0.5) samples--
       else segments--
     }
-    return new SampledInterpolator(dim, segments, samples)
+    return new InterpolatedSurface(dim, segments, samples)
   }
 
   constructor(d: number, dm: number, samples: number) {
@@ -56,13 +57,7 @@ export class SampledInterpolator implements DataModel {
         this.data[b][b][a] +
         this.data[b][b][b]) /
       8
-    /*
-        for (x=0;x<d;x++)
-            for (y=0;y<d;y++)
-                for (z=0;z<d;z++)
-                    this.data[x][y][z] /= samples;
-        */
-    this.doFilter(this.thres)
+    this.filter = this.doFilter(this.thres)
   }
 
   private interpolateTricubic(m: number[][][], n: number) {
@@ -84,40 +79,14 @@ export class SampledInterpolator implements DataModel {
           kl = k * l
           w = ~~kl
           z = kl - w
-          c[i][j][k] = CubicInterpolator.getTricubic(
-            m,
-            u - 1,
-            v - 1,
-            w - 1,
-            x,
-            y,
-            z
-          )
+          c[i][j][k] = getTricubic(m, u - 1, v - 1, w - 1, x, y, z)
         }
       }
     }
     return c
   }
 
-  /*
-	doFilter() {
-		let x,y,z,d=this.data.length
-		this.cubes = 0
-		this.filter = new Array(d)
-		for (x=0;x<d;x++) {
-			this.filter[x] = new Array(d)
-			for (y=0;y<d;y++) {
-				this.filter[x][y] = new Array(d)
-				for (z=0;z<d;z++)
-					if (this.filter[x][y][z] = this.data[x][y][z]>this.thres-0.015 && this.data[x][y][z]<this.thres+0.015)
-						this.cubes++
-			}
-		}
-		return this
-	}
-    */
-
-  doFilter(thres: number, eps: number = 0.0035) {
+  doFilter(thres: number, eps: number = this.tolerance) {
     return this.data.map((z) =>
       z.map((y) => y.map((x) => (x > thres - eps && x < thres + eps ? 1 : 0)))
     )
@@ -141,7 +110,7 @@ export class SampledInterpolator implements DataModel {
         for (z = 0; z < d; z++) {
           dz = z - dh
           z2 = dz * dz
-          if ((this.filter[x][y][z] = x2 + y2 + z2 < d2)) this.cubes++
+          if ((this.filter[x][y][z] = x2 + y2 + z2 < d2 ? 1 : 0)) this.cubes++
         }
       }
     }
@@ -149,11 +118,11 @@ export class SampledInterpolator implements DataModel {
   }
 
   getData() {
-    return this.doFilter(this.thres, 0.006)
+    return this.filter
   }
 
   step() {
-    this.thres += 0.0001
+    this.filter = this.doFilter((this.thres += 0.001))
     while (this.thres > 0.3) this.thres -= 0.3
   }
 }

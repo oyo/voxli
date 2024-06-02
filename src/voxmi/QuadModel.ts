@@ -1,17 +1,11 @@
+import { Model } from './Model'
 import type { Color } from './Types'
 
-export class QuadModel {
+export class QuadModel extends Model {
   shade = { xm: 0.5, xp: 0.6, ym: 0.3, yp: 0.9, zm: 0.4, zp: 0.8 }
-  v: number[] = []
-  c: number[] = []
 
   constructor() {
-    this.clear()
-  }
-
-  clear() {
-    this.v = []
-    this.c = []
+    super()
   }
 
   quadXM(x: number, y: number, z: number, c: Color) {

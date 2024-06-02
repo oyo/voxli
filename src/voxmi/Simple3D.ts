@@ -1,10 +1,11 @@
-import type { QuadModel } from './QuadModel'
+import type { Model } from './Model'
 import type { Color, Vector2, Vector3 } from './Types'
 
 export class Simple3D {
+  parent: HTMLElement
   cam = { fov: 40 }
   pos: Vector3 = { x: 0, y: 0, z: -20 }
-  rot: Vector2 = { x: 0, y: 0 /*, z: 0*/ }
+  rot: Vector2 = { x: 0, y: 0 }
   col: Color = { r: 0.7, g: 0.9, b: 1, a: 1 } //{ r: 0.059, g: 0.059, b: 0.137, a: 1 }//{ r: 0, g: 0.1, b: 0.25, a: 1 } // { r: 0.9, g: 0.95, b: 1, a: 1 }
   rMatrix = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
   mode = true
@@ -14,12 +15,13 @@ export class Simple3D {
   shader: WebGLProgram | null = null
   vertexPositionAttribute: number = 0
   vertexColorAttribute: number = 0
-  scene: QuadModel | null = null
+  scene: Model | null = null
   pMatrix: Float32Array = new Float32Array()
   resizeTimer: NodeJS.Timeout | null = null
   numItems: number = 0
 
-  constructor() {
+  constructor(parent: HTMLElement) {
+    this.parent = parent
     this.canvas = document.createElement('canvas')
     try {
       this.gl = this.canvas.getContext('webgl') ?? new WebGLRenderingContext()
@@ -33,10 +35,11 @@ export class Simple3D {
     this.gl.enable(this.gl.DEPTH_TEST)
     this.gl.enable(this.gl.CULL_FACE)
     this.gl.depthFunc(this.gl.LEQUAL)
-    document.body.appendChild(this.canvas)
+    this.parent.appendChild(this.canvas)
     this.initShaders()
-    this.resize()
+    this.parent.addEventListener('resize', this.requestResize.bind(this))
     window.addEventListener('resize', this.requestResize.bind(this))
+    requestAnimationFrame(this.render.bind(this))
   }
 
   initShaders() {
@@ -106,6 +109,7 @@ void main(void) {
   }
 
   render() {
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
     if (!this.scene) return
     const cx = Math.cos(this.rot.x),
       sx = Math.sin(this.rot.x),
@@ -123,23 +127,23 @@ void main(void) {
     r[12] = this.pos.x
     r[13] = this.pos.y
     r[14] = this.pos.z
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
     this.gl.uniformMatrix4fv(this.uniRM, false, r)
     this.gl.drawArrays(
       this.mode ? this.gl.TRIANGLES : this.gl.LINES,
       0,
       this.numItems
     )
+    requestAnimationFrame(this.render.bind(this))
   }
 
   requestResize() {
     if (this.resizeTimer) clearTimeout(this.resizeTimer)
-    this.resizeTimer = setTimeout(this.resize.bind(this), 10)
+    this.resizeTimer = setTimeout(this.resize.bind(this), 30)
   }
 
   resize() {
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
+    this.canvas.width = this.parent.clientWidth
+    this.canvas.height = this.parent.clientHeight
     this.pMatrix = new Float32Array(
       this.perspective(
         this.cam.fov,
@@ -155,10 +159,9 @@ void main(void) {
         false,
         this.pMatrix
       )
-    this.render()
   }
 
-  setScene(scene: QuadModel) {
+  setScene(scene: Model) {
     const arrayToBuffer = (arr: number[], itemSize: number, ptr: number) => {
       const buf = this.gl.createBuffer()
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buf)
@@ -174,7 +177,6 @@ void main(void) {
     arrayToBuffer(scene.c, 3, this.vertexColorAttribute)
     arrayToBuffer(scene.v, 3, this.vertexPositionAttribute)
     this.numItems = scene.v.length / 3
-    this.render()
     return this
   }
 
@@ -184,15 +186,13 @@ void main(void) {
     return this
   }
 
-  setPos(p: Vector3) {
-    this.pos = p
-    this.render()
+  setPos(p: Partial<Vector3>) {
+    this.pos = { ...this.pos, ...p }
     return this
   }
 
-  setRot(r: Vector2) {
-    this.rot = r
-    this.render()
+  setRot(r: Partial<Vector2>) {
+    this.rot = { ...this.rot, ...r }
     return this
   }
 
@@ -200,8 +200,7 @@ void main(void) {
     this.pos.x += c[0]
     this.pos.y += c[1]
     this.pos.z += c[2]
-    if (this.pos.z > -2) this.pos.z = -2
-    this.render()
+    if (this.pos.z > 0) this.pos.z = 0
     return this
   }
 
@@ -210,7 +209,6 @@ void main(void) {
     this.rot.x += r[1] / 360
     if (this.rot.x > Math.PI / 2) this.rot.x = Math.PI / 2
     else if (this.rot.x < -Math.PI / 2) this.rot.x = -Math.PI / 2
-    this.render()
     return this
   }
 }
