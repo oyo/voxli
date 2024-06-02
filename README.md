@@ -49,7 +49,7 @@ Then go and overwrite `src/main.ts` with this:
 
     new SceneViewer(
       new Scene(dataModel),
-      new Simple3D().setPos({ x: 0, y: 0, z: -15 }).setCamFov(40),
+      new Simple3D(document.body).setPos({ z: -15 }).setCamFov(40),
       new UserInput().setMove({ u: -45, v: -8, w: -2 })
     )
 
@@ -61,15 +61,15 @@ Now take this more sophisticated example:
 
     import {
       AnimatedScene,
-      SampledInterpolator,
+      InterpolatedSurface,
       SceneViewer,
       Simple3D,
       UserInput,
     } from 'voxmi'
 
     new SceneViewer(
-      new AnimatedScene(new SampledInterpolator(60, 3, 1)).start(300),
-      new Simple3D().setPos({ x: 0, y: 0, z: -140 }).setCamFov(40),
+      new AnimatedScene(new InterpolatedSurface(100, 3, 1)).start(1000),
+      new Simple3D(document.body).setPos({ z: -120 }).setCamFov(90),
       new UserInput().setMove({ u: 10, v: 5, w: -2 })
     )
 
