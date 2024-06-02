@@ -30,9 +30,6 @@ jobs:
         id: get_tag
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
-      - name: Output tag
-        run: echo ${{ steps.get_tag.outputs.VERSION }} ${{ github.ref_name }}
-
       - name: Checkout repository
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
@@ -49,8 +46,17 @@ jobs:
         id: npm-tag
         uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
 
-      - name: Compare tag and npm version
-        if: ${{ steps.get_tag.outputs.VERSION }} == ${{ steps.npm-tag.outputs.current-version }}
+      - name: Output tags
+        run: >-
+          echo GIT ${{ github.ref_name }}
+          echo NPM ${{ steps.npm_tag.outputs.current-version }}
+
+      - name: Check if tag and npm version match
+        if: ${{ github.ref_name }} != ${{ steps.npm-tag.outputs.current-version }}
+        run: echo "version not matching" && exit 1 
+  
+      - name: Versions match
+        if: ${{ github.ref_name }} == ${{ steps.npm-tag.outputs.current-version }}
         run: echo "tag and npm version match"
 
       - name: Install Dependencies

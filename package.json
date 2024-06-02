@@ -1,6 +1,6 @@
 {
   "name": "voxmi",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A minimalistic, zero dependency 3d engine for simple voxel visualizations based on WebGL",
   "author": "Martin Rohrmeier <roryphant@gmail.com> (oyo)",
   "license": "MIT",
