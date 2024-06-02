@@ -47,14 +47,14 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
 
       - name: Output tags
-        run: echo GIT ${{ github.ref_name }}\nNPM ${{ steps.npm-tag.outputs.current-version }}\n
+        run: echo GIT ${{ github.ref_name }} NPM ${{ steps.npm-tag.outputs.current-version }}
 
       - name: Check if tag and npm version match
-        if: ${{ github.ref_name }} != ${{ steps.npm-tag.outputs.current-version }}
+        if: ${{ github.ref_name != steps.npm-tag.outputs.current-version }}
         run: echo "version not matching" && exit 1 
   
       - name: Versions match
-        if: ${{ github.ref_name }} == ${{ steps.npm-tag.outputs.current-version }}
+        if: ${{ github.ref_name == steps.npm-tag.outputs.current-version }}
         run: echo "tag and npm version match"
 
       - name: Install Dependencies
