@@ -47,9 +47,7 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
 
       - name: Output tags
-        run: >-
-          echo GIT ${{ github.ref_name }}
-          echo NPM ${{ steps.npm_tag.outputs.current-version }}
+        run: echo GIT ${{ github.ref_name }}\nNPM ${{ steps.npm-tag.outputs.current-version }}\n
 
       - name: Check if tag and npm version match
         if: ${{ github.ref_name }} != ${{ steps.npm-tag.outputs.current-version }}
