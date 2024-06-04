@@ -20,7 +20,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint src/ --fix",
+      "eslint --quiet --fix",
       "prettier --write --ignore-unknown"
     ],
     "*.{json,css,sass,scss,xml,yml,md}": [
