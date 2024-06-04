@@ -19,10 +19,11 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": [
-      "prettier --write",
-      "eslint src/ --fix",
-      "jest --bail --findRelatedTests"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint src/ --fix"
+    ],
+    "*.{json,js,ts,jsx,tsx,html}": [
+      "prettier --write --ignore-unknown"
     ]
   },
   "scripts": {
