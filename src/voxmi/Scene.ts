@@ -7,7 +7,7 @@ export class Scene extends QuadModel {
   listener: SceneListener[] = []
   model: DataModel = { getData: () => [] }
   colorMap: ColorMapType = {
-    0: { r: 0.8, g: 0.8, b: 0.8 },
+    0: { r: 0, g: 0, b: 0 },
     1: { r: 0.8, g: 0.5, b: 0.2 },
   }
 

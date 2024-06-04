@@ -9,7 +9,7 @@ export class SceneViewer implements SceneListener, UserInputListener {
 
   constructor(scene: Scene, output?: Simple3D, input?: UserInput) {
     this.input = (input ?? new UserInput()).addListener(this)
-    this.output = output ?? new Simple3D(document.body)
+    this.output = output ?? new Simple3D().setPos({ z: -3 }).setCamFov(90)
     this.scene = scene.addListener(this)
   }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## unreleased 0.0.7
+
+- added lint-staged and husky pre-commit hooks
+- added star shape
+- rendering improvements
+
 ## 0.0.6
 
 - fix: constant frame rate

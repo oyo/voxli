@@ -20,8 +20,8 @@ export class Simple3D {
   resizeTimer: NodeJS.Timeout | null = null
   numItems: number = 0
 
-  constructor(parent: HTMLElement) {
-    this.parent = parent
+  constructor(parent?: HTMLElement) {
+    this.parent = parent ?? document.body
     this.canvas = document.createElement('canvas')
     this.parent.appendChild(this.canvas)
     try {

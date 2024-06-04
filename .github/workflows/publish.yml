@@ -53,10 +53,6 @@ jobs:
         if: ${{ github.ref_name != steps.npm-tag.outputs.current-version }}
         run: echo "version not matching" && exit 1
 
-      - name: Versions match
-        if: ${{ github.ref_name == steps.npm-tag.outputs.current-version }}
-        run: echo "tag and npm version match"
-
       - name: Install Dependencies
         run: yarn
 

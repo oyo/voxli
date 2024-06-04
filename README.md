@@ -25,35 +25,11 @@ change `index.html` to remove any margins from the body:
 
 Then go and overwrite `src/main.ts` with this:
 
-    import { SceneViewer, Scene, Simple3D, UserInput } from 'voxmi'
+    import { Scene, SceneViewer } from 'voxmi'
 
-    const dataModel = {
-      getData: () => [
-        [
-          [1, 1, 1],
-          [1, 0, 0],
-          [1, 0, 0],
-        ],
-        [
-          [0, 0, 1],
-          [0, 0, 1],
-          [1, 1, 1],
-        ],
-        [
-          [1, 1, 1],
-          [1, 0, 0],
-          [1, 0, 1],
-        ],
-      ],
-    }
+    new SceneViewer(new Scene({ getData: () => [[[1, 0, 1]]] }))
 
-    new SceneViewer(
-      new Scene(dataModel),
-      new Simple3D(document.body).setPos({ z: -15 }).setCamFov(40),
-      new UserInput().setMove({ u: -45, v: -8, w: -2 })
-    )
-
-You should see a 3D rendering of your 3 x 3 x 3 data matrix.
+In the browser you should now see a 3D rendering showing two cubes.
 
 ![Sample Image](https://oyo.github.io/voxmi/sample-1.png)
 
