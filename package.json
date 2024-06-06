@@ -1,18 +1,18 @@
 {
-  "name": "voxmi",
-  "version": "0.0.7",
+  "name": "voxli",
+  "version": "0.1.1",
   "description": "A minimalistic, zero dependency 3d engine for simple voxel visualizations based on WebGL",
   "author": "Martin Rohrmeier <roryphant@gmail.com> (oyo)",
   "license": "MIT",
   "type": "module",
-  "main": "dist/voxmi.js",
+  "main": "dist/voxli.js",
   "types": "dist/main.d.ts",
   "files": [
     "dist"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oyo/voxmi.git"
+    "url": "git+https://github.com/oyo/voxli.git"
   },
   "jest": {
     "preset": "ts-jest",
@@ -23,7 +23,7 @@
       "eslint --quiet --fix",
       "prettier --write --ignore-unknown"
     ],
-    "*.{json,css,sass,scss,xml,yml,md}": [
+    "*.{json,css,sass,scss,xml,yml,yaml,md}": [
       "prettier --write --ignore-unknown"
     ]
   },
@@ -32,7 +32,7 @@
     "build": "tsc && vite build",
     "build:sample": "tsc && vite build --config vite.config.sample.ts",
     "preview": "vite preview",
-    "pretty": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,sass,scss,xml,yml,md}\"",
+    "pretty": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,sass,scss,xml,yml,yaml,md}\"",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --ignore-pattern \"{build,dist}/**/*\" --report-unused-disable-directives --max-warnings 0",
     "lint:staged": "lint-staged",
     "test": "jest",

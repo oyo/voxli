@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/voxmi/',
+  base: '/voxli/',
   plugins: [],
   build: {
     outDir: './build',

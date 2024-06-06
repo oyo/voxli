@@ -8,11 +8,18 @@ export type MouseStatusType = {
   max?: number
 }
 
-export type UserInputListener = {
+export interface UserInputListener {
   keysChanged?: (mask: number) => void
   mouseChanged?: (status: MouseStatusType) => void
   zoomChanged?: (y: number) => void
 }
+
+export const KEYS: Array<number> = [
+  37, //left
+  38, //up
+  39, //right
+  40, //down
+].concat(new Array(26).fill(0).map((_, i) => i + 65)) //a-z
 
 export class UserInput {
   mouse: MouseStatusType = {
@@ -24,34 +31,37 @@ export class UserInput {
     w: 0,
     max: 70,
   }
+  keyMap: Record<number, number> = this.generateKeyMap()
   keyMask: number = 0
   listener: UserInputListener[] = []
   keyTimer: NodeJS.Timeout | undefined
   slowDownTimer: NodeJS.Timeout | undefined
 
-  constructor() {
-    document.addEventListener('mousedown', this.mouseDown.bind(this))
-    document.addEventListener('mouseup', this.mouseUp.bind(this))
-    document.addEventListener('mouseout', this.mouseUp.bind(this))
-    document.addEventListener('mousemove', this.mouseMove.bind(this))
-    document.addEventListener('keydown', this.keyDown.bind(this))
-    document.addEventListener('keyup', this.keyUp.bind(this))
-    document.addEventListener('wheel', this.mouseWheel.bind(this))
-    document.addEventListener('touchstart', this.touch2Mouse.bind(this), true)
-    document.addEventListener('touchmove', this.touch2Mouse.bind(this), true)
-    document.addEventListener('touchend', this.touch2Mouse.bind(this), true)
+  bindTo(node: HTMLElement | null) {
+    const parent = node ?? document.body
+    parent.addEventListener('mousedown', this.mouseDown.bind(this))
+    parent.addEventListener('mouseup', this.mouseUp.bind(this))
+    parent.addEventListener('mouseout', this.mouseUp.bind(this))
+    parent.addEventListener('mousemove', this.mouseMove.bind(this))
+    parent.addEventListener('keydown', this.keyDown.bind(this))
+    parent.addEventListener('keyup', this.keyUp.bind(this))
+    parent.addEventListener('wheel', this.mouseWheel.bind(this))
+    parent.addEventListener('touchstart', this.touch2Mouse.bind(this), true)
+    parent.addEventListener('touchmove', this.touch2Mouse.bind(this), true)
+    parent.addEventListener('touchend', this.touch2Mouse.bind(this), true)
     this.mouseUp()
+    this.startKeyTimer()
+    return this
   }
 
-  setMove(move: Partial<MouseStatusType>) {
-    this.mouse = {
-      ...this.mouse,
-      ...move,
-    }
-    return this.move()
+  private generateKeyMap() {
+    return KEYS.reduce((acc: Record<number, number>, key, i) => {
+      acc[key] = 1 << i
+      return acc
+    }, {})
   }
 
-  touch2Mouse(evt: TouchEvent) {
+  private touch2Mouse(evt: TouchEvent) {
     const touch = evt.changedTouches[0]
     let mouseEv
     switch (evt.type) {
@@ -89,11 +99,12 @@ export class UserInput {
     evt.preventDefault()
   }
 
-  mouseWheel(evt: WheelEvent) {
+  private mouseWheel(evt: WheelEvent) {
     this.fireZoomChanged(evt.deltaY)
+    evt.preventDefault()
   }
 
-  mouseMove(evt: MouseEvent) {
+  private mouseMove(evt: MouseEvent) {
     if (!this.mouse.button) return
     this.mouse.u = evt.clientX - this.mouse.x
     this.mouse.v = evt.clientY - this.mouse.y
@@ -106,9 +117,10 @@ export class UserInput {
     this.move()
     this.mouse.x = evt.clientX
     this.mouse.y = evt.clientY
+    evt.preventDefault()
   }
 
-  slowDown() {
+  private slowDown() {
     this.mouse.u *= 0.98
     this.mouse.v *= 0.9
     this.mouse.w *= 0.9
@@ -129,12 +141,12 @@ export class UserInput {
     if (stop) clearInterval(this.slowDownTimer)
   }
 
-  move() {
+  private move() {
     this.fireMouseChanged()
     return this
   }
 
-  mouseDown(evt: MouseEvent) {
+  private mouseDown(evt: MouseEvent) {
     this.mouse.button = true
     this.mouse.x = evt.clientX
     this.mouse.y = evt.clientY
@@ -143,74 +155,42 @@ export class UserInput {
     clearInterval(this.slowDownTimer)
   }
 
-  mouseUp() {
+  private mouseUp() {
     this.mouse.button = false
     this.slowDownTimer = setInterval(this.slowDown.bind(this), 20)
   }
 
-  keyDown(evt: KeyboardEvent) {
-    //console.log(evt.keyCode)
-    switch (evt.keyCode) {
-      case 37:
-        this.startKeyTimer(1)
-        break
-      case 40:
-        this.startKeyTimer(2)
-        break
-      case 39:
-        this.startKeyTimer(4)
-        break
-      case 38:
-        this.startKeyTimer(8)
-        break
-      case 187:
-        this.startKeyTimer(16)
-        break
-      case 189:
-        this.startKeyTimer(32)
-        break
-    }
+  private keyDown(evt: KeyboardEvent) {
+    this.keyMask |= this.keyMap[evt.keyCode]
+    if (!this.keyTimer) this.startKeyTimer()
   }
 
-  keyUp(evt: KeyboardEvent) {
-    switch (evt.keyCode) {
-      case 37:
-        this.keyMask &= ~1
-        break //left
-      case 40:
-        this.keyMask &= ~2
-        break //down
-      case 39:
-        this.keyMask &= ~4
-        break //right
-      case 38:
-        this.keyMask &= ~8
-        break //up
-      case 187:
-        this.keyMask &= ~16
-        break //+
-      case 189:
-        this.keyMask &= ~32
-        break //-
-    }
-  }
-
-  startKeyTimer(mask: number) {
-    this.keyMask |= mask
-    if (this.keyTimer) return
-    this.keyTimer = setInterval(this.processKeys.bind(this), 1)
-  }
-
-  processKeys() {
+  private keyUp(evt: KeyboardEvent) {
+    this.keyMask = this.keyMask & ~this.keyMap[evt.keyCode]
     if (this.keyMask === 0) {
       clearInterval(this.keyTimer)
       this.keyTimer = undefined
     }
-    this.fireKeysChanged()
+  }
+
+  private startKeyTimer() {
+    if (this.keyTimer) return
+    this.keyTimer = setInterval(this.fireKeysChanged.bind(this), 10)
+  }
+
+  setMove(move: Partial<MouseStatusType>) {
+    this.mouse = {
+      ...this.mouse,
+      ...move,
+    }
+    return this.move()
   }
 
   addListener(l: UserInputListener) {
-    this.listener.push(l)
+    if (!this.listener.includes(l)) this.listener.push(l)
+    l.keysChanged?.(this.keyMask)
+    l.mouseChanged?.(this.mouse)
+    l.zoomChanged?.(this.mouse.w)
     return this
   }
 

@@ -1,1 +1,1 @@
-export * from './voxmi'
+export * from './voxli'

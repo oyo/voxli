@@ -1,3 +1,5 @@
+import type { Color, StyleMap } from '../Types'
+
 export class Gradient {
   color: number[] = new Array(256)
   constructor() {
@@ -16,7 +18,13 @@ export class Gradient {
     for (let i = 0; i < 256; i++)
       this.color[i] = (this.color[(i + 128) % 256] - min) / d + 0.2
   }
-  getColor(v: number) {
+  getColorStyle(col: Color): StyleMap {
+    return this.color.reduce((a: StyleMap, c: number, i: number) => {
+      a[i] = { color: { r: col.r * c, g: col.g * c, b: col.b * c } }
+      return a
+    }, {} as StyleMap)
+  }
+  getColor(v: number): number {
     return this.color[Math.floor(v * 255) % 256]
   }
 }
