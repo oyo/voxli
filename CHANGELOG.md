@@ -1,7 +1,9 @@
 # Changelog
 
-## unreleased 0.0.7
+## 0.1.0
 
+- rename package
+- API changes
 - added lint-staged and husky pre-commit hooks
 - added star shape
 - rendering improvements

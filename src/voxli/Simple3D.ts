@@ -1,28 +1,33 @@
-import type { Model } from './Model'
-import type { Color, Vector2, Vector3 } from './Types'
+import {
+  COLOR,
+  type Camera,
+  type Color,
+  type Vector2,
+  type Vector3,
+} from '../voxli/Types'
+import { Model } from './Model'
 
 export class Simple3D {
   parent: HTMLElement
-  cam = { fov: 60 }
-  pos: Vector3 = { x: 0, y: 0, z: 0 }
-  rot: Vector2 = { x: 0, y: 0 }
-  col: Color = { r: 0.7, g: 0.9, b: 1, a: 1 } //{ r: 0.059, g: 0.059, b: 0.137, a: 1 }//{ r: 0, g: 0.1, b: 0.25, a: 1 } // { r: 0.9, g: 0.95, b: 1, a: 1 }
+  cam: Camera = { fov: 60, pos: { x: 0, y: 0, z: 0 }, rot: { x: 0, y: 0 } }
+  background: Color = COLOR.DEFAULT_BACKGROUND
   rMatrix = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
   pMatrix = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -1, 0, 0, 0, 1])
-  mode = true
   uniRM: WebGLUniformLocation | null = null
   canvas: HTMLCanvasElement
   gl: WebGLRenderingContext
   shader: WebGLProgram | null = null
   vertexPositionAttribute: number = 0
   vertexColorAttribute: number = 0
-  scene: Model | null = null
+  model: Model = new Model()
   resizeTimer: NodeJS.Timeout | null = null
   numItems: number = 0
 
   constructor(parent?: HTMLElement) {
     this.parent = parent ?? document.body
     this.canvas = document.createElement('canvas')
+    while (this.parent.firstChild)
+      this.parent.removeChild(this.parent.firstChild)
     this.parent.appendChild(this.canvas)
     try {
       this.gl = this.canvas.getContext('webgl') ?? new WebGLRenderingContext()
@@ -31,7 +36,7 @@ export class Simple3D {
       this.gl = new WebGLRenderingContext()
       return
     }
-    this.gl.clearColor(this.col.r, this.col.g, this.col.b, this.col.a ?? 1)
+    this.setBackgroundColor(this.background)
     this.gl.clearDepth(1)
     this.gl.enable(this.gl.DEPTH_TEST)
     this.gl.enable(this.gl.CULL_FACE)
@@ -41,7 +46,7 @@ export class Simple3D {
     requestAnimationFrame(this.render.bind(this))
   }
 
-  initShaders() {
+  private initShaders() {
     const sh = this.gl.createProgram() ?? new WebGLProgram()
     const vs = this.getShader(
       this.gl.VERTEX_SHADER,
@@ -75,7 +80,7 @@ void main(void) {
     this.gl.enableVertexAttribArray(this.vertexColorAttribute)
   }
 
-  getShader(type: number, source: string) {
+  private getShader(type: number, source: string) {
     const s = this.gl.createShader(type) ?? new WebGLShader()
     this.gl.shaderSource(s, source)
     this.gl.compileShader(s)
@@ -84,7 +89,7 @@ void main(void) {
     return s
   }
 
-  perspective(fov: number, aspect: number, near: number, far: number) {
+  private perspective(fov: number, aspect: number, near: number, far: number) {
     const f = 1.0 / Math.tan((fov * Math.PI) / 360)
     const ri = 1 / (near - far)
     const p = this.pMatrix
@@ -94,13 +99,12 @@ void main(void) {
     p[14] = near * far * ri * 2
   }
 
-  render() {
+  private render() {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
-    if (!this.scene) return
-    const cx = Math.cos(this.rot.x),
-      sx = Math.sin(this.rot.x),
-      cy = Math.cos(this.rot.y),
-      sy = Math.sin(this.rot.y),
+    const cx = Math.cos(this.cam.rot.x),
+      sx = Math.sin(this.cam.rot.x),
+      cy = Math.cos(this.cam.rot.y),
+      sy = Math.sin(this.cam.rot.y),
       r = this.rMatrix
     r[0] = cy
     r[1] = sx * sy
@@ -110,26 +114,27 @@ void main(void) {
     r[8] = sy
     r[9] = -sx * cy
     r[10] = cx * cy
-    r[12] = this.pos.x
-    r[13] = this.pos.y
-    r[14] = this.pos.z
+    r[12] = this.cam.pos.x
+    r[13] = this.cam.pos.y
+    r[14] = this.cam.pos.z
     this.gl.uniformMatrix4fv(this.uniRM, false, r)
-    this.gl.drawArrays(
-      this.mode ? this.gl.TRIANGLES : this.gl.LINES,
-      0,
-      this.numItems
-    )
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, this.numItems)
     requestAnimationFrame(this.render.bind(this))
   }
 
-  requestResize() {
+  private requestResize() {
     if (this.resizeTimer) clearTimeout(this.resizeTimer)
     this.resizeTimer = setTimeout(this.resize.bind(this), 10)
   }
 
-  resize() {
-    this.canvas.width = this.parent.clientWidth
-    this.canvas.height = this.parent.clientHeight
+  private resize() {
+    const cs = getComputedStyle(this.parent)
+    const px = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+    const py = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+    const bx = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)
+    const by = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+    this.canvas.width = this.parent.clientWidth - px - bx
+    this.canvas.height = this.parent.clientHeight - py - by
     this.perspective(
       this.cam.fov,
       this.canvas.width / this.canvas.height,
@@ -145,7 +150,7 @@ void main(void) {
     )
   }
 
-  setScene(scene: Model) {
+  setModel(model: Model) {
     const arrayToBuffer = (arr: number[], itemSize: number, ptr: number) => {
       const buf = this.gl.createBuffer()
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buf)
@@ -157,42 +162,48 @@ void main(void) {
       this.gl.vertexAttribPointer(ptr, itemSize, this.gl.FLOAT, false, 0, 0)
       return buf
     }
-    this.scene = scene
-    arrayToBuffer(scene.c, 3, this.vertexColorAttribute)
-    arrayToBuffer(scene.v, 3, this.vertexPositionAttribute)
-    this.numItems = scene.v.length / 3
+    this.model = model
+    arrayToBuffer(model.c, 3, this.vertexColorAttribute)
+    arrayToBuffer(model.v, 3, this.vertexPositionAttribute)
+    this.numItems = model.v.length / 3
     return this
   }
 
-  setCamFov(fov: number) {
-    this.cam.fov = fov
+  setBackgroundColor(color: Color) {
+    this.background = color
+    this.gl.clearColor(color.r, color.g, color.b, color.a ?? 1)
+    return this
+  }
+
+  setCamera(camera: Partial<Camera>) {
+    this.cam = { ...this.cam, ...camera }
     this.resize()
     return this
   }
 
-  setPos(p: Partial<Vector3>) {
-    this.pos = { ...this.pos, ...p }
+  setCameraPos(p: Partial<Vector3>) {
+    this.cam.pos = { ...this.cam.pos, ...p }
     return this
   }
 
-  setRot(r: Partial<Vector2>) {
-    this.rot = { ...this.rot, ...r }
+  setCameraRot(r: Partial<Vector2>) {
+    this.cam.rot = { ...this.cam.rot, ...r }
     return this
   }
 
-  updatePos(c: number[]) {
-    this.pos.x += c[0]
-    this.pos.y += c[1]
-    this.pos.z += c[2]
-    if (this.pos.z > 0) this.pos.z = 0
+  updateCameraPos(pos: Partial<Vector3>) {
+    this.cam.pos.x += pos.x ?? 0
+    this.cam.pos.y += pos.y ?? 0
+    this.cam.pos.z += pos.z ?? 0
+    if (this.cam.pos.z > 0) this.cam.pos.z = 0
     return this
   }
 
-  updateRot(r: number[]) {
-    this.rot.y += r[0] / 360
-    this.rot.x += r[1] / 360
-    if (this.rot.x > Math.PI / 2) this.rot.x = Math.PI / 2
-    else if (this.rot.x < -Math.PI / 2) this.rot.x = -Math.PI / 2
+  updateCameraRot(rot: Partial<Vector3>) {
+    this.cam.rot.y += rot.y ?? 0
+    this.cam.rot.x += rot.x ?? 0
+    if (this.cam.rot.x > Math.PI / 2) this.cam.rot.x = Math.PI / 2
+    else if (this.cam.rot.x < -Math.PI / 2) this.cam.rot.x = -Math.PI / 2
     return this
   }
 }

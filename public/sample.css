@@ -1,0 +1,42 @@
+body {
+  background-color: rgb(35, 73, 75);
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+ul.samples {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+ul.samples > li {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.sample > canvas {
+  border-radius: 10px;
+}
+.sample,
+.code {
+  background-color: cadetblue;
+  border-radius: 10px;
+  margin: 20px;
+}
+.sample {
+  width: 360px;
+  height: 360px;
+}
+.code {
+  flex-grow: 3;
+  background-color: rgb(169, 201, 202);
+  color: #404040;
+  font-family: 'Source Code Pro', 'Menlo', 'Courier New', Courier, monospace;
+  font-size: 20px;
+  line-height: 28px;
+  height: 320px;
+  padding: 20px;
+  overflow: auto;
+}

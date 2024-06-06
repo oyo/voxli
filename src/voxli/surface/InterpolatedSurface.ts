@@ -1,7 +1,6 @@
 import { getTricubic } from './Interpolator'
-import { DataModel } from './Types'
 
-export class InterpolatedSurface implements DataModel {
+export class InterpolatedSurface {
   data: number[][][]
   filter: number[][][] = []
   thres: number
