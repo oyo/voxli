@@ -3,8 +3,7 @@ import { getTricubic } from './Interpolator'
 export class InterpolatedSurface {
   data: number[][][]
   filter: number[][][] = []
-  thres: number
-  tolerance: number = 0.0003
+  tolerance: number = 0.001
   cubes: number = 0
 
   static createRandom(dim: number) {
@@ -42,21 +41,7 @@ export class InterpolatedSurface {
         for (x = 0; x < d; x++)
           for (z = 0; z < d; z++) this.data[x][y][z] += tdat[x][y][z] / dm
       dm = ((dm - 1) << 1) + 1
-      //dm++;
     }
-    const a = Math.floor(d / 3),
-      b = Math.floor((2 * d) / 3) + 1
-    this.thres =
-      (this.data[a][a][a] +
-        this.data[a][a][b] +
-        this.data[a][b][a] +
-        this.data[a][b][b] +
-        this.data[b][a][a] +
-        this.data[b][a][b] +
-        this.data[b][b][a] +
-        this.data[b][b][b]) /
-      8
-    this.filter = this.doFilter(this.thres)
   }
 
   private interpolateTricubic(m: number[][][], n: number) {
@@ -85,43 +70,82 @@ export class InterpolatedSurface {
     return c
   }
 
-  doFilter(thres: number, eps: number = this.tolerance) {
-    return this.data.map((z) =>
-      z.map((y) => y.map((x) => (x > thres - eps && x < thres + eps ? 1 : 0)))
+  doNormalize8bit(data: number[][][]) {
+    return data.map((z) => z.map((y) => y.map((x) => Math.floor(x * 255))))
+  }
+
+  doFilter(thres?: number, eps: number = this.tolerance) {
+    const a = Math.floor(this.data.length / 3),
+      b = Math.floor((2 * this.data.length) / 3) + 1
+    if (!thres)
+      thres =
+        (this.data[a][a][a] +
+          this.data[a][a][b] +
+          this.data[a][b][a] +
+          this.data[a][b][b] +
+          this.data[b][a][a] +
+          this.data[b][a][b] +
+          this.data[b][b][a] +
+          this.data[b][b][b]) /
+        8
+
+    return this.doNormalize8bit(
+      this.data.map((z) =>
+        z.map((y) => y.map((x) => (x > thres - eps && x < thres + eps ? 1 : 0)))
+      )
+    )
+  }
+
+  doFilterCube() {
+    const dim = this.data.length
+    return this.doNormalize8bit(
+      this.data.map((z, zi) =>
+        z.map((y, yi) =>
+          y.map((x, xi) =>
+            xi === 0 ||
+            xi === dim - 1 ||
+            yi === 0 ||
+            yi === dim - 1 ||
+            zi === 0 ||
+            zi === dim - 1
+              ? x
+              : 0
+          )
+        )
+      )
     )
   }
 
   doFilterSphere() {
-    let x, y, z, dx, dy, dz, x2, y2, z2
+    let x, y, z, dx, dy, dz, x2, y2, z2, ds
     const d = this.data.length
     const dh = d >> 1
     const d2 = dh * dh
     this.cubes = 0
-    this.filter = new Array(d)
+    const filter = new Array(d)
     for (x = 0; x < d; x++) {
       dx = x - dh
       x2 = dx * dx
-      this.filter[x] = new Array(d)
+      filter[x] = new Array(d)
       for (y = 0; y < d; y++) {
         dy = y - dh
         y2 = dy * dy
-        this.filter[x][y] = new Array(d)
+        filter[x][y] = new Array(d)
         for (z = 0; z < d; z++) {
           dz = z - dh
           z2 = dz * dz
-          if ((this.filter[x][y][z] = x2 + y2 + z2 < d2 ? 1 : 0)) this.cubes++
+          ds = x2 + y2 + z2
+          if (
+            (filter[x][y][z] = ds < d2 && ds > d2 - d ? this.data[x][y][z] : 0)
+          )
+            this.cubes++
         }
       }
     }
-    return this
+    return this.doNormalize8bit(filter)
   }
 
   getData() {
-    return this.filter
-  }
-
-  step() {
-    this.filter = this.doFilter((this.thres += 0.001))
-    while (this.thres > 0.3) this.thres -= 0.3
+    return this.data
   }
 }

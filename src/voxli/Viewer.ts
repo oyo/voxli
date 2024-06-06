@@ -10,12 +10,18 @@ export class Viewer implements UserInputListener, ModelListener {
   constructor(data: Model | number[][][], node?: HTMLElement | null) {
     const parent = node ?? document.body
     new UserInput().bindTo(parent).addListener(this)
-    this.output = new Simple3D(parent)
-      .setCameraPos({ z: -6 })
-      .setCamera({ fov: 60 })
+    this.output = new Simple3D(parent).setCamera({ fov: 60 })
     this.model = Array.isArray(data)
       ? new VoxelScene().addListener(this).setData(data)
       : data.addListener(this).updateModel()
+    this.focus()
+  }
+
+  focus() {
+    this.output?.parent.focus()
+    const dim = (this.model as VoxelScene).dimension
+    const maxdim = Math.max(dim.x, dim.y, dim.z)
+    this.output.updateCameraPos({ z: -maxdim * 1.5 })
   }
 
   keysChanged(keyMask: number) {

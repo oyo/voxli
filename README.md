@@ -2,9 +2,9 @@
 
 A minimalistic, zero dependency 3d engine for simple voxel visualizations based on WebGL.
 
-[GitHub Repositor](https://github.com/oyo/voxli)
-[Sample Application](https://oyo.github.io/voxli/)
-[NPM Package](https://www.npmjs.com/package/voxli)
+- [GitHub Repository](https://github.com/oyo/voxli)
+- [Sample Application](https://oyo.github.io/voxli/)
+- [NPM Package](https://www.npmjs.com/package/voxli)
 
 ![Sample Image](https://oyo.github.io/voxli/sample-2.png)
 
@@ -34,3 +34,5 @@ Then go and overwrite `src/main.ts` with this:
 In the browser you should now see a 3D rendering showing two cubes.
 
 ![Sample Image](https://oyo.github.io/voxli/sample-1.png)
+
+Open the [Sample Application](https://oyo.github.io/voxli/) to see some examples

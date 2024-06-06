@@ -1,5 +1,7 @@
 import {
   COLOR,
+  Gradient,
+  InterpolatedSurface,
   Shape,
   UserInput,
   UserInputListener,
@@ -23,6 +25,8 @@ import {
     keysChanged() {}
   }
   new Sample()
+  InterpolatedSurface.createRandom(10)
+  new Gradient()
 }
 // end blind code
 
@@ -68,7 +72,7 @@ const runCode = (i: number) => {
   }
 }
 
-function debounce(func, timeout = 500) {
+function debounce(func, timeout = 2000) {
   let timer: NodeJS.Timeout
   return (...args) => {
     clearTimeout(timer)
@@ -127,6 +131,18 @@ new Viewer(
   new CustomScene().start(),
   document.getElementById('sample')
 )`,
+  `new Viewer(
+  InterpolatedSurface.createRandom(100).doFilter(),
+  document.getElementById('sample')
+)`,
+  `class TextureScene extends VoxelScene {
+  data = new InterpolatedSurface(80, 2, 2).doFilterSphere()
+  style = new Gradient().getColorStyle(COLOR.DEFAULT_VOXEL)
+}
+new Viewer(
+new TextureScene(),
+document.getElementById('sample')
+)`,
 ].map((source, i) => source.trim().replace('sample', `sample${i}`))
 
 document.body.removeChild(document.getElementsByClassName('samples')[0])
@@ -139,12 +155,17 @@ document.body.appendChild(
           N('textarea', source, {
             class: 'code',
             id: `code${i}`,
+            tabindex: i * 2 + 1,
           }),
           {
             keyup: debounce(() => runCode(i)),
           }
         ),
-        N('div', null, { class: 'sample', id: `sample${i}` }),
+        N('div', null, {
+          class: 'sample',
+          id: `sample${i}`,
+          tabindex: i * 2 + 2,
+        }),
       ])
     ),
     { class: 'samples' }

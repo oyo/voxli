@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- updated InterpolatedSurface and extended examples
+
 ## 0.1.0
 
 - rename package
