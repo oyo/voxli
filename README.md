@@ -35,4 +35,6 @@ In the browser you should now see a 3D rendering showing two cubes.
 
 ![Sample Image](https://oyo.github.io/voxli/sample-1.png)
 
-Open the [Sample Application](https://oyo.github.io/voxli/) to see some examples
+Open the [Sample Application](https://oyo.github.io/voxli/) to see more examples
+
+![Sample Application](https://oyo.github.io/voxli/sample-app.png)

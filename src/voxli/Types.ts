@@ -28,6 +28,7 @@ export const COLOR: Record<string, Color> = {
   CYAN: { r: 0, g: 1, b: 1 },
   MAGENTA: { r: 1, g: 0, b: 1 },
   ORANGE: { r: 1, g: 0.5, b: 0 },
+  GRAY: { r: 0.5, g: 0.5, b: 0.5 },
   CADETBLUE: { r: 0.372, g: 0.619, b: 0.627 },
   LIGHTSKYBLUE: { r: 0.529, g: 0.808, b: 0.98 },
 }

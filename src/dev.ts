@@ -1,5 +1,6 @@
 import {
   COLOR,
+  ConwayCubes,
   Gradient,
   InterpolatedSurface,
   Shape,
@@ -25,6 +26,7 @@ import {
     keysChanged() {}
   }
   new Sample()
+  new ConwayCubes()
   InterpolatedSurface.createRandom(10)
   new Gradient()
 }
@@ -137,11 +139,34 @@ new Viewer(
 )`,
   `class TextureScene extends VoxelScene {
   data = new InterpolatedSurface(80, 2, 2).doFilterSphere()
-  style = new Gradient().getColorStyle(COLOR.DEFAULT_VOXEL)
+  style = new Gradient().getColorStyle(COLOR.LIGHTSKYBLUE)
 }
 new Viewer(
-new TextureScene(),
-document.getElementById('sample')
+  new TextureScene(),
+  document.getElementById('sample')
+)`,
+  `class ConwayScene extends VoxelScene {
+  counter = 35
+  constructor() {
+    super()
+    this.game = new ConwayCubes()
+    this.data = this.game.getData()
+    setInterval(this.step.bind(this), 800)
+  }
+  step() {
+    if (--this.counter > 0)
+      this.game.step()
+    else {
+      this.counter = 35
+      this.game.init()
+    }
+    this.data = this.game.getData()
+    this.updateModel()
+  }
+}
+new Viewer(
+  new ConwayScene(),
+  document.getElementById('sample')
 )`,
 ].map((source, i) => source.trim().replace('sample', `sample${i}`))
 
@@ -173,3 +198,5 @@ document.body.appendChild(
 )
 
 samples.forEach((_, i) => runCode(i))
+
+document.getElementById('code0')?.focus()

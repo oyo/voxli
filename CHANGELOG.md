@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- added 3D Game of Life
+
 ## 0.1.1
 
 - updated InterpolatedSurface and extended examples
