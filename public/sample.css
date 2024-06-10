@@ -29,6 +29,9 @@ ul.samples > li {
   width: 360px;
   height: 360px;
 }
+.changed {
+  opacity: 0.2;
+}
 .code {
   flex-grow: 3;
   background-color: rgb(169, 201, 202);

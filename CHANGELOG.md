@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- improved samples
+
 ## 0.1.2
 
 - added 3D Game of Life
