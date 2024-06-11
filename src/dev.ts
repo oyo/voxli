@@ -78,7 +78,8 @@ const samples = [
   `new Viewer(
   [[[1, 0, 1]]],
   document.getElementById('sample')
-).input.setMove({u: -45.8, v: 6})`,
+)
+.input.setMove({u: -46.2, v: 12})`,
   `class CustomScene extends VoxelScene {
   data = [[[1, 2, 3]]]
   style = {
