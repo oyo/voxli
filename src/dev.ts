@@ -66,15 +66,7 @@ const addEvents = (node, evts) => {
   return node
 }
 
-const runCode = (i: number) => {
-  try {
-    eval((document.getElementById(`code${i}`) as HTMLTextAreaElement)!.value)
-  } catch (e) {
-    // ignore
-  }
-}
-
-function debounce(func, timeout = 2000) {
+function debounce(func, timeout = 300) {
   let timer: NodeJS.Timeout
   return (...args) => {
     clearTimeout(timer)
@@ -86,7 +78,8 @@ const samples = [
   `new Viewer(
   [[[1, 0, 1]]],
   document.getElementById('sample')
-)`,
+)
+.input.setMove({u: -46.2, v: 12})`,
   `class CustomScene extends VoxelScene {
   data = [[[1, 2, 3]]]
   style = {
@@ -170,6 +163,31 @@ new Viewer(
 )`,
 ].map((source, i) => source.trim().replace('sample', `sample${i}`))
 
+const changed = samples.map(() => false)
+
+const setChanged = (i) => {
+  if (changed[i]) return
+  changed[i] = true
+  const sample = document.getElementById(`sample${i}`)!
+  sample.className += ' changed'
+}
+
+const runCode = (i: number) => {
+  try {
+    eval((document.getElementById(`code${i}`) as HTMLTextAreaElement)!.value)
+  } catch (e) {
+    // ignore
+  }
+}
+
+const checkChange = (i: number) => {
+  const div = document.getElementById(`sample${i}`)!
+  if (!changed[i]) return
+  div.className = div.className.replace(' changed', '')
+  changed[i] = false
+  runCode(i)
+}
+
 document.body.removeChild(document.getElementsByClassName('samples')[0])
 document.body.appendChild(
   N(
@@ -183,14 +201,26 @@ document.body.appendChild(
             tabindex: i * 2 + 1,
           }),
           {
-            keyup: debounce(() => runCode(i)),
+            keypress: debounce(() => setChanged(i)),
+            input: debounce(() => setChanged(i)),
+            paste: debounce(() => setChanged(i)),
           }
         ),
-        N('div', null, {
-          class: 'sample',
-          id: `sample${i}`,
-          tabindex: i * 2 + 2,
-        }),
+        addEvents(
+          N('div', null, {
+            class: 'sample',
+            id: `sample${i}`,
+            tabindex: i * 2 + 2,
+          }),
+          {
+            click: () => {
+              const div = document.getElementById(`sample${i}`)!
+              div.focus()
+              checkChange(i)
+            },
+            focus: () => checkChange(i),
+          }
+        ),
       ])
     ),
     { class: 'samples' }

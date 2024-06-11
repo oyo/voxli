@@ -49,8 +49,6 @@ export class UserInput {
     parent.addEventListener('touchstart', this.touch2Mouse.bind(this), true)
     parent.addEventListener('touchmove', this.touch2Mouse.bind(this), true)
     parent.addEventListener('touchend', this.touch2Mouse.bind(this), true)
-    this.mouseUp()
-    this.startKeyTimer()
     return this
   }
 
@@ -153,6 +151,7 @@ export class UserInput {
     this.mouse.u = 0
     this.mouse.v = 0
     clearInterval(this.slowDownTimer)
+    evt.preventDefault()
   }
 
   private mouseUp() {
@@ -175,7 +174,7 @@ export class UserInput {
 
   private startKeyTimer() {
     if (this.keyTimer) return
-    this.keyTimer = setInterval(this.fireKeysChanged.bind(this), 10)
+    this.keyTimer = setInterval(this.fireKeysChanged.bind(this), 5)
   }
 
   setMove(move: Partial<MouseStatusType>) {
@@ -183,6 +182,7 @@ export class UserInput {
       ...this.mouse,
       ...move,
     }
+    this.mouseUp()
     return this.move()
   }
 

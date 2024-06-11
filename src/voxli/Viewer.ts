@@ -4,12 +4,13 @@ import { Simple3D } from './Simple3D'
 import { MouseStatusType, UserInput, UserInputListener } from './UserInput'
 
 export class Viewer implements UserInputListener, ModelListener {
+  input: UserInput
   output: Simple3D
   model: Model
 
   constructor(data: Model | number[][][], node?: HTMLElement | null) {
     const parent = node ?? document.body
-    new UserInput().bindTo(parent).addListener(this)
+    this.input = new UserInput().bindTo(parent).addListener(this)
     this.output = new Simple3D(parent).setCamera({ fov: 60 })
     this.model = Array.isArray(data)
       ? new VoxelScene().addListener(this).setData(data)
@@ -27,7 +28,7 @@ export class Viewer implements UserInputListener, ModelListener {
   keysChanged(keyMask: number) {
     if (keyMask === 0) return
     //console.log(keyMask)
-    const speed = 0.5
+    const speed = 0.01 * (2 - this.output.cam.pos.z)
     const pos = { x: 0, y: 0, z: 0 }
     if (keyMask & 1) pos.x += -speed
     if (keyMask & 2) pos.y += speed

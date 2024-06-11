@@ -1,4 +1,4 @@
-import type { Color, StyleMap } from '../Types'
+import { type Color, COLOR, StyleMap } from '../Types'
 
 export class Gradient {
   color: number[] = new Array(256)
@@ -20,7 +20,8 @@ export class Gradient {
       this.color[i] = (this.color[(i + 128) % 256] - min) / d + 0.2
   }
 
-  getColorStyle(col: Color): StyleMap {
+  getColorStyle(col?: Color): StyleMap {
+    col ??= COLOR.DEFAULT_VOXEL
     return this.color.reduce((a: StyleMap, c: number, i: number) => {
       a[i] = { color: { r: col.r * c, g: col.g * c, b: col.b * c } }
       return a
