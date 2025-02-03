@@ -31,8 +31,8 @@ export class Simple3D {
     this.parent.appendChild(this.canvas)
     try {
       this.gl = this.canvas.getContext('webgl') ?? new WebGLRenderingContext()
-    } catch (e) {
-      alert('WebGL not initialized!')
+    } catch (e: unknown) {
+      alert(`WebGL not initialized! ${e}`)
       this.gl = new WebGLRenderingContext()
       return
     }
