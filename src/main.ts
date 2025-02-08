@@ -15,10 +15,11 @@ import {
 {
   const sample = document.getElementById('sample')!
   new Viewer([[[1, 0, 1]]], sample)
+  const color = COLOR
 
   class Sample extends VoxelScene implements UserInputListener {
     data = [[[1]]]
-    style = { 1: { shape: Shape.DIAMOND, color: COLOR.YELLOW } }
+    style = { 1: { shape: Shape.DIAMOND, color: color.YELLOW } }
     constructor() {
       super()
       new UserInput().bindTo(sample).addListener(this)
